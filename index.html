@@ -213,6 +213,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
     <div class="secim" style="margin-top:10px">
       <button id="basaDon">En baştan başla</button>
     </div></div>
+  <div style="text-align:center;font-size:11px;color:var(--cok-soluk);margin:-6px 0 12px">
+    sürüm <span id="surumNo">5</span> · basılı tut = dur
+  </div>
   <button class="kapat" id="kapatTus">Kapat</button>
 </div>
 
@@ -817,9 +820,26 @@ document.getElementById('basla').onclick = function () { baslat(rastgeleBaslangi
 parcaYukle(0, function () { durumEl.textContent = ''; });
 durumEl.textContent = 'veriler yükleniyor…';
 
+/* Guncelleme: eski surum onbellekte takili kalmasin.
+   sw.js her acilista agdan kontrol edilir; yeni surum devralinca sayfa bir kez
+   kendini yeniler. */
+var SURUM = 5;
 if ('serviceWorker' in navigator) {
+  var yenilendi = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (yenilendi) return;
+    yenilendi = true;
+    location.reload();
+  });
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function () {});
+    navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'})
+      .then(function (kayit) {
+        kayit.update();
+        document.addEventListener('visibilitychange', function () {
+          if (!document.hidden) kayit.update();
+        });
+      })
+      .catch(function () {});
   });
 }
 </script>
