@@ -24,7 +24,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #ray{position:absolute;left:0;top:0;width:100%;will-change:transform}
 .kart{position:relative;width:100%;display:flex;flex-direction:column;
   justify-content:center;align-items:center;padding:64px 20px 92px;overflow:hidden}
-.ic{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.ic{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;
+  transition:filter .16s ease,transform .16s ease}
+/* basili tutunca / duraklatinca kart bulaniklasir (Shorts / WhatsApp story) */
+#ray.durdu .ic{filter:blur(7px) brightness(.62) saturate(.85);transform:scale(.985)}
 
 /* ---------- kelime karti ---------- */
 .etiket{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cok-soluk);
@@ -102,11 +105,14 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 
 /* ---------- durakla katmani ---------- */
 #durak{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;
-  flex-direction:column;gap:14px;background:#0b0d1288;backdrop-filter:blur(2px);pointer-events:none}
+  flex-direction:column;gap:14px;background:#0b0d1255;pointer-events:none}
 #durak.acik{display:flex}
+#durak.gecici{background:transparent}
+#durak.gecici p{display:none}
 #durak .simge{width:88px;height:88px;border-radius:50%;background:#ffffff14;border:1px solid var(--cizgi);
   display:flex;align-items:center;justify-content:center;gap:8px}
 #durak .simge b{width:11px;height:34px;border-radius:3px;background:var(--yazi);display:block}
+#durak.gecici .simge{background:#ffffff0f;border-color:transparent}
 #durak p{margin:0;font-size:14px;color:var(--soluk)}
 
 /* ---------- ayarlar ---------- */
@@ -213,9 +219,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 <div id="giris">
   <h1>İngilizce Shorts</h1>
   <p class="alt">20.000 kelime, 4.000 cümle. Her 5 kelimeden sonra bir cümle gelir.
-     Kartlar telaffuzdan sonra kendiliğinden kayar — <b>ekrana dokununca durur</b>,
-     kaydırınca yeniden akmaya başlar.</p>
-  <div class="ozet"><span>En basit kelimeden başlar</span><span>Örnek cümle + okunuş</span><span>Çevrimdışı çalışır</span></div>
+     Kartlar telaffuzdan sonra kendiliğinden kayar — <b>parmağını basılı tuttuğun
+     sürece durur</b>, bıraktığında devam eder.</p>
+  <div class="ozet"><span>Her açılışta farklı bir kelime</span><span>Örnek cümle + okunuş</span><span>Çevrimdışı çalışır</span></div>
   <button id="basla">Başla</button>
   <button id="devam" hidden></button>
   <div class="yukleniyor" id="girisDurum"></div>
@@ -283,12 +289,15 @@ var A = {
   mod: 'oto', hiz: 'normal', icerik: 'hepsi', ses: 'kisa',
   turkce: 'acik', okunus: 'acik'
 };
-var KONUM = {hepsi: 0, kelime: 0, cumle: 0};
+var KONUM = {hepsi: 0, kelime: 0, cumle: 0};   // kaldigin yer
+var DERIN = {hepsi: 0, kelime: 0, cumle: 0};   // simdiye kadar gelinen en ileri kart
 try {
   var kayit = JSON.parse(localStorage.getItem('shorts-ayar') || '{}');
   for (var k in kayit) if (A.hasOwnProperty(k)) A[k] = kayit[k];
   var kk = JSON.parse(localStorage.getItem('shorts-konum') || '{}');
   for (var k2 in kk) if (KONUM.hasOwnProperty(k2)) KONUM[k2] = kk[k2] | 0;
+  var dd = JSON.parse(localStorage.getItem('shorts-derin') || '{}');
+  for (var k3 in dd) if (DERIN.hasOwnProperty(k3)) DERIN[k3] = dd[k3] | 0;
   // ilk surumde varsayilan "kelime + cumle" idi; hizli okuyus varsayilan oldu
   if (localStorage.getItem('shorts-surum') !== '2') {
     A.ses = (A.ses === 'kapali') ? 'kapali' : 'kisa';
@@ -299,7 +308,23 @@ function ayarKaydet() {
   try {
     localStorage.setItem('shorts-ayar', JSON.stringify(A));
     localStorage.setItem('shorts-konum', JSON.stringify(KONUM));
+    localStorage.setItem('shorts-derin', JSON.stringify(DERIN));
   } catch (e) {}
+}
+function konumYaz(m) {
+  KONUM[A.icerik] = m;
+  if (m > (DERIN[A.icerik] | 0)) DERIN[A.icerik] = m;
+  ayarKaydet();
+}
+// Her acilista farkli bir kelimeden basla: sira ayni (kolaydan zora), sadece
+// giris noktasi degisir. Ilerledikce pencere genisler ama basit tarafta kalir.
+function rastgeleBaslangic() {
+  var d = DERIN[A.icerik] | 0;
+  var pencere = Math.max(120, Math.floor(d * 0.4));
+  pencere = Math.min(pencere, toplam());
+  var m = Math.floor(Math.random() * pencere);
+  if (A.icerik === 'hepsi' && m % BLOK === PER) m = Math.max(0, m - 1);  // kelimeyle basla
+  return m;
 }
 
 var HIZ = {
@@ -566,8 +591,7 @@ function ilerle(yon) {
     ray.removeEventListener('transitionend', bit);
     ray.style.transition = 'none';
     n = hedef;
-    KONUM[A.icerik] = n;
-    ayarKaydet();
+    konumYaz(n);
     dy = 0;
     yerlestir(0);
     tazele();
@@ -585,16 +609,26 @@ function yaslan() {   // sinirda geri yayla
   setTimeout(function () { ray.style.transition = 'none'; dy = 0; }, 210);
 }
 
-function durdur(dur) {
+// gecici = parmak basili (WhatsApp story): sadece bulanik, "dokun" yazisi yok
+function gorselDurak(ac, gecici) {
+  durakEl.classList.toggle('acik', !!ac);
+  durakEl.classList.toggle('gecici', !!ac && !!gecici);
+  ray.classList.toggle('durdu', !!ac);
+}
+function durdur(dur, gecici, gorselsiz) {
   duraklat = dur;
-  durakEl.classList.toggle('acik', dur);
-  if (dur) { zamanTemizle(); sustur(); }
-  else oynat();
+  if (dur) {
+    zamanTemizle(); sustur();
+    if (!gorselsiz) gorselDurak(true, gecici);
+  } else {
+    gorselDurak(false);
+    oynat();
+  }
 }
 
 function gitKart(m) {
   m = Math.max(0, Math.min(toplam() - 1, m | 0));
-  n = m; KONUM[A.icerik] = n; ayarKaydet();
+  n = m; konumYaz(n);
   dy = 0; ray.style.transition = 'none'; yerlestir(0);
   tazele();
   hazirla(n, function () { tazele(); });
@@ -602,18 +636,28 @@ function gitKart(m) {
 }
 
 /* ---------------- dokunma / kaydirma ---------------- */
-var bx = 0, by = 0, bt = 0, aktif = false;
+/* Parmak degdigi anda ses susar (basili tuttukca durur), kaldirinca devam eder.
+   Kisa dokunus ise yapisik duraklatir/devam ettirir. Kaydirma her hâlde akisi
+   yeniden baslatir. */
+var bx = 0, by = 0, bt = 0, aktif = false, oncekiDuraklat = false, bulanikT = null;
 
 sahne.addEventListener('pointerdown', function (e) {
   if (gecis) return;
   aktif = true; suruklu = false;
   bx = e.clientX; by = e.clientY; bt = Date.now();
+  oncekiDuraklat = duraklat;
+  if (!duraklat) durdur(true, true, true);      // sessizce durdur, gorsel gecikmeli
+  clearTimeout(bulanikT);
+  bulanikT = setTimeout(function () {
+    if (aktif && !suruklu) gorselDurak(true, !oncekiDuraklat);
+  }, 130);
   sahne.setPointerCapture && sahne.setPointerCapture(e.pointerId);
 });
 sahne.addEventListener('pointermove', function (e) {
   if (!aktif) return;
   var d = e.clientY - by;
   if (!suruklu && Math.abs(d) < 8) return;
+  if (!suruklu) { clearTimeout(bulanikT); gorselDurak(false); }
   suruklu = true;
   if ((n === 0 && d > 0) || (n === toplam() - 1 && d < 0)) d *= 0.28;
   dy = d;
@@ -623,23 +667,36 @@ sahne.addEventListener('pointermove', function (e) {
 sahne.addEventListener('pointerup', function (e) {
   if (!aktif) return;
   aktif = false;
+  clearTimeout(bulanikT);
   var d = e.clientY - by, sure = Date.now() - bt;
-  if (!suruklu && Math.abs(d) < 10 && sure < 400) { dokunuldu(e); return; }
+  // kisa dokunus = yapisik duraklat/devam · 220 ms ustu = basili tutma, birakinca devam
+  if (!suruklu && Math.abs(d) < 10 && sure < 220) { dokunuldu(e); return; }
   var esik = Math.min(90, H * 0.16);
-  if (d < -esik || (d < -25 && sure < 260)) { duraklat = false; durakEl.classList.remove('acik'); ilerle(1); }
-  else if (d > esik || (d > 25 && sure < 260)) { duraklat = false; durakEl.classList.remove('acik'); ilerle(-1); }
-  else yaslan();
+  if (d < -esik || (d < -25 && sure < 260)) { duraklat = false; gorselDurak(false); ilerle(1); }
+  else if (d > esik || (d > 25 && sure < 260)) { duraklat = false; gorselDurak(false); ilerle(-1); }
+  else {
+    yaslan();
+    if (oncekiDuraklat) gorselDurak(true, false);   // zaten duruyordu, oyle kalsin
+    else durdur(false);                             // parmak kalkti -> devam
+  }
 });
-sahne.addEventListener('pointercancel', function () { aktif = false; yaslan(); });
+sahne.addEventListener('pointercancel', function () {
+  if (!aktif) return;
+  aktif = false; clearTimeout(bulanikT);
+  yaslan();
+  if (!oncekiDuraklat) durdur(false); else gorselDurak(true, false);
+});
 
 function dokunuldu(e) {
   // gizli Turkce alanina dokunulduysa once onu ac
   var hedef = e.target && e.target.closest ? e.target.closest('.trAlan') : null;
   if (hedef && hedef.classList.contains('gizliTr')) {
     hedef.classList.remove('gizliTr');
+    if (oncekiDuraklat) gorselDurak(true, false); else durdur(false);
     return;
   }
-  durdur(!duraklat);
+  if (oncekiDuraklat) durdur(false);   // duruyordu -> devam
+  else durdur(true);                   // oynuyordu -> yapisik durdur
 }
 
 // masaustu: tekerlek + klavye
@@ -649,14 +706,14 @@ sahne.addEventListener('wheel', function (e) {
   var s = Date.now();
   if (s - tekerKilit < 380 || Math.abs(e.deltaY) < 12) return;
   tekerKilit = s;
-  duraklat = false; durakEl.classList.remove('acik');
+  duraklat = false; gorselDurak(false);
   ilerle(e.deltaY > 0 ? 1 : -1);
 }, {passive: false});
 
 document.addEventListener('keydown', function (e) {
   if (document.getElementById('ayar').classList.contains('acik')) return;
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') { duraklat = false; durakEl.classList.remove('acik'); ilerle(1); e.preventDefault(); }
-  else if (e.key === 'ArrowUp' || e.key === 'PageUp') { duraklat = false; durakEl.classList.remove('acik'); ilerle(-1); e.preventDefault(); }
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') { duraklat = false; gorselDurak(false); ilerle(1); e.preventDefault(); }
+  else if (e.key === 'ArrowUp' || e.key === 'PageUp') { duraklat = false; gorselDurak(false); ilerle(-1); e.preventDefault(); }
   else if (e.key === ' ' || e.key === 'p') { durdur(!duraklat); e.preventDefault(); }
 });
 
@@ -698,7 +755,7 @@ function isaretle() {
     });
   });
   ipucuEl.innerHTML = A.mod === 'oto'
-    ? 'Dokun = dur · Yukarı kaydır = sonraki'
+    ? 'Basılı tut = dur · Yukarı kaydır = sonraki'
     : 'Manuel mod · Yukarı kaydır = sonraki';
 }
 grupKur('s-mod', 'mod');
@@ -753,9 +810,9 @@ if (ilk > 0) {
   devamEl.hidden = false;
   devamEl.textContent = 'Kaldığın yerden devam et (' + (ilk + 1).toLocaleString('tr') + '. kart)';
   devamEl.onclick = function () { baslat(ilk); };
-  document.getElementById('basla').textContent = 'Baştan başla';
 }
-document.getElementById('basla').onclick = function () { baslat(ilk > 0 ? 0 : ilk); };
+// her acilista baska bir basit kelimeden basla
+document.getElementById('basla').onclick = function () { baslat(rastgeleBaslangic()); };
 
 parcaYukle(0, function () { durumEl.textContent = ''; });
 durumEl.textContent = 'veriler yükleniyor…';

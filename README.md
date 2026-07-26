@@ -4,7 +4,12 @@ Shorts gibi kendiliğinden kayan kartlarla İngilizce. **20.000 kelime + 4.000 c
 en basit kelimeden başlayarak.
 
 * Her kart telaffuz bittikten sonra **kendi kendine** kayar.
-* **Ekrana dokununca durur.** Tekrar dokununca ya da kaydırınca akış devam eder.
+* **Parmağını basılı tuttuğun sürece durur** (WhatsApp story mantığı): kart
+  bulanıklaşır, ses susar; parmağını kaldırınca kaldığı yerden devam eder.
+  Kısa dokunuş yapışık duraklatır/devam ettirir, kaydırmak akışı yeniden başlatır.
+* Her açılışta **farklı bir kelimeden** başlar: sıralama hep aynı (kolaydan
+  zora), yalnızca giriş noktası ilk ~120 kartın içinden rastgele seçilir;
+  ilerledikçe bu pencere en derin noktanın %40'ına kadar genişler.
 * Sıralama: **5 kelime → 1 cümle → 5 kelime → 1 cümle …** (toplam 24.000 kart)
 * Kelime kartında: kelime, Türkçe okunuşu, IPA, tür, Türkçe anlam +
   **örnek cümle** (İngilizcesi, Türkçe okunuşu, Türkçe anlamı).
