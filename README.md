@@ -10,7 +10,9 @@ en basit kelimeden başlayarak.
   **örnek cümle** (İngilizcesi, Türkçe okunuşu, Türkçe anlamı).
 * Cümle kartında: cümle, Türkçe okunuşu, Türkçe anlamı.
 * Ayarlar: mod (otomatik/manuel), hız (4 kademe), içerik (5+1 / sadece kelime /
-  sadece cümle), seslendirme, Türkçe anlamı gizleme (kendini sınamak için),
+  sadece cümle), seslendirme (varsayılan **hızlı**: kelime kartında yalnız
+  kelime, cümle kartında yalnız cümle okunur; istersen kelime + örnek cümle),
+  Türkçe anlamı gizleme (kendini sınamak için),
   okunuşu gizleme, konum çubuğu.
 * Kaldığın yer kaydedilir; çevrimdışı çalışır (PWA).
 

@@ -188,8 +188,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
     </div></div>
   <div class="satir"><div class="ad">Seslendirme</div>
     <div class="secim" id="s-ses">
-      <button data-v="tam">Kelime + cümle</button>
-      <button data-v="kisa">Sadece kelime</button>
+      <button data-v="kisa">Hızlı (sadece kelime)</button>
+      <button data-v="tam">Kelime + örnek cümle</button>
       <button data-v="kapali">Kapalı</button>
     </div></div>
   <div class="satir"><div class="ad">Türkçe anlam</div>
@@ -277,8 +277,10 @@ function parcaYukle(no, sonra) {
 }
 
 /* ---------------- ayarlar ---------------- */
+// ses: 'kisa' = kelime kartinda yalniz kelime, cumle kartinda yalniz cumle (hizli)
+//      'tam'  = kelime + ornek cumle
 var A = {
-  mod: 'oto', hiz: 'normal', icerik: 'hepsi', ses: 'tam',
+  mod: 'oto', hiz: 'normal', icerik: 'hepsi', ses: 'kisa',
   turkce: 'acik', okunus: 'acik'
 };
 var KONUM = {hepsi: 0, kelime: 0, cumle: 0};
@@ -287,6 +289,11 @@ try {
   for (var k in kayit) if (A.hasOwnProperty(k)) A[k] = kayit[k];
   var kk = JSON.parse(localStorage.getItem('shorts-konum') || '{}');
   for (var k2 in kk) if (KONUM.hasOwnProperty(k2)) KONUM[k2] = kk[k2] | 0;
+  // ilk surumde varsayilan "kelime + cumle" idi; hizli okuyus varsayilan oldu
+  if (localStorage.getItem('shorts-surum') !== '2') {
+    A.ses = (A.ses === 'kapali') ? 'kapali' : 'kisa';
+    localStorage.setItem('shorts-surum', '2');
+  }
 } catch (e) {}
 function ayarKaydet() {
   try {
@@ -717,7 +724,7 @@ konumEl.onchange = function () { gitKart(konumEl.value | 0); ustGuncelle(); };
 document.getElementById('basaDon').onclick = function () { gitKart(0); konumKur(); };
 
 document.getElementById('sesTus').onclick = function () {
-  A.ses = (A.ses === 'kapali') ? 'tam' : 'kapali';
+  A.ses = (A.ses === 'kapali') ? 'kisa' : 'kapali';
   document.getElementById('sesTus').textContent = A.ses === 'kapali' ? '🔇' : '🔊';
   isaretle(); ayarKaydet();
   if (basladi && !duraklat) oynat();
