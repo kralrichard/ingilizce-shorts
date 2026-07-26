@@ -24,10 +24,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #ray{position:absolute;left:0;top:0;width:100%;will-change:transform}
 .kart{position:relative;width:100%;display:flex;flex-direction:column;
   justify-content:center;align-items:center;padding:64px 20px 92px;overflow:hidden}
-.ic{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center;
-  transition:filter .16s ease,transform .16s ease}
-/* basili tutunca / duraklatinca kart bulaniklasir (Shorts / WhatsApp story) */
-#ray.durdu .ic{filter:blur(7px) brightness(.62) saturate(.85);transform:scale(.985)}
+.ic{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
 
 /* ---------- kelime karti ---------- */
 .etiket{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--cok-soluk);
@@ -104,16 +101,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #ipucu{font-size:12px;color:var(--cok-soluk);text-align:center;line-height:1.4}
 
 /* ---------- durakla katmani ---------- */
-#durak{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;
-  flex-direction:column;gap:14px;background:#0b0d1255;pointer-events:none}
+/* duraklatma isareti: bulaniklik/karartma YOK, yalnizca kucuk bir simge */
+#durak{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 52px);
+  z-index:25;display:none;align-items:center;justify-content:center;gap:10px;
+  background:transparent;pointer-events:none}
 #durak.acik{display:flex}
-#durak.gecici{background:transparent}
-#durak.gecici p{display:none}
-#durak .simge{width:88px;height:88px;border-radius:50%;background:#ffffff14;border:1px solid var(--cizgi);
-  display:flex;align-items:center;justify-content:center;gap:8px}
-#durak .simge b{width:11px;height:34px;border-radius:3px;background:var(--yazi);display:block}
-#durak.gecici .simge{background:#ffffff0f;border-color:transparent}
-#durak p{margin:0;font-size:14px;color:var(--soluk)}
+#durak .simge{width:30px;height:30px;border-radius:50%;background:#ffffff1f;
+  display:flex;align-items:center;justify-content:center;gap:4px}
+#durak .simge b{width:4px;height:13px;border-radius:2px;background:var(--yazi);display:block}
+#durak p{margin:0;font-size:13px;color:var(--soluk)}
 
 /* ---------- ayarlar ---------- */
 #ortu{position:fixed;inset:0;background:#000a;z-index:40;display:none}
@@ -214,7 +210,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
       <button id="basaDon">En baştan başla</button>
     </div></div>
   <div style="text-align:center;font-size:11px;color:var(--cok-soluk);margin:-6px 0 12px">
-    sürüm <span id="surumNo">5</span> · basılı tut = dur
+    sürüm <span id="surumNo">6</span> · basılı tut = dur
   </div>
   <button class="kapat" id="kapatTus">Kapat</button>
 </div>
@@ -612,11 +608,9 @@ function yaslan() {   // sinirda geri yayla
   setTimeout(function () { ray.style.transition = 'none'; dy = 0; }, 210);
 }
 
-// gecici = parmak basili (WhatsApp story): sadece bulanik, "dokun" yazisi yok
+// gecici = parmak basili (WhatsApp story): ekranda hicbir sey degismez, sadece durur
 function gorselDurak(ac, gecici) {
-  durakEl.classList.toggle('acik', !!ac);
-  durakEl.classList.toggle('gecici', !!ac && !!gecici);
-  ray.classList.toggle('durdu', !!ac);
+  durakEl.classList.toggle('acik', !!ac && !gecici);
 }
 function durdur(dur, gecici, gorselsiz) {
   duraklat = dur;
@@ -641,26 +635,22 @@ function gitKart(m) {
 /* ---------------- dokunma / kaydirma ---------------- */
 /* Parmak degdigi anda ses susar (basili tuttukca durur), kaldirinca devam eder.
    Kisa dokunus ise yapisik duraklatir/devam ettirir. Kaydirma her hâlde akisi
-   yeniden baslatir. */
-var bx = 0, by = 0, bt = 0, aktif = false, oncekiDuraklat = false, bulanikT = null;
+   yeniden baslatir. Basili tutarken ekranda gorsel bir degisiklik olmaz. */
+var bx = 0, by = 0, bt = 0, aktif = false, oncekiDuraklat = false;
 
 sahne.addEventListener('pointerdown', function (e) {
   if (gecis) return;
   aktif = true; suruklu = false;
   bx = e.clientX; by = e.clientY; bt = Date.now();
   oncekiDuraklat = duraklat;
-  if (!duraklat) durdur(true, true, true);      // sessizce durdur, gorsel gecikmeli
-  clearTimeout(bulanikT);
-  bulanikT = setTimeout(function () {
-    if (aktif && !suruklu) gorselDurak(true, !oncekiDuraklat);
-  }, 130);
+  if (!duraklat) durdur(true, true, true);      // sessizce durdur
   sahne.setPointerCapture && sahne.setPointerCapture(e.pointerId);
 });
 sahne.addEventListener('pointermove', function (e) {
   if (!aktif) return;
   var d = e.clientY - by;
   if (!suruklu && Math.abs(d) < 8) return;
-  if (!suruklu) { clearTimeout(bulanikT); gorselDurak(false); }
+  if (!suruklu) gorselDurak(false);
   suruklu = true;
   if ((n === 0 && d > 0) || (n === toplam() - 1 && d < 0)) d *= 0.28;
   dy = d;
@@ -670,7 +660,6 @@ sahne.addEventListener('pointermove', function (e) {
 sahne.addEventListener('pointerup', function (e) {
   if (!aktif) return;
   aktif = false;
-  clearTimeout(bulanikT);
   var d = e.clientY - by, sure = Date.now() - bt;
   // kisa dokunus = yapisik duraklat/devam · 220 ms ustu = basili tutma, birakinca devam
   if (!suruklu && Math.abs(d) < 10 && sure < 220) { dokunuldu(e); return; }
@@ -685,7 +674,7 @@ sahne.addEventListener('pointerup', function (e) {
 });
 sahne.addEventListener('pointercancel', function () {
   if (!aktif) return;
-  aktif = false; clearTimeout(bulanikT);
+  aktif = false;
   yaslan();
   if (!oncekiDuraklat) durdur(false); else gorselDurak(true, false);
 });
@@ -823,7 +812,7 @@ durumEl.textContent = 'veriler yükleniyor…';
 /* Guncelleme: eski surum onbellekte takili kalmasin.
    sw.js her acilista agdan kontrol edilir; yeni surum devralinca sayfa bir kez
    kendini yeniler. */
-var SURUM = 5;
+var SURUM = 6;
 if ('serviceWorker' in navigator) {
   var yenilendi = false;
   navigator.serviceWorker.addEventListener('controllerchange', function () {

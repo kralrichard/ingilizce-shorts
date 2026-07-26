@@ -2,7 +2,7 @@
    Kabuk (index.html, sw disi dosyalar): once ag, olmazsa onbellek -> guncelleme
    hemen gelir.  Veri parcalari (veri/*.js): once onbellek -> hem hizli hem
    cevrimdisi.  Surum yayinlarken CACHE artmali. */
-const CACHE = 'ing-shorts-v5';
+const CACHE = 'ing-shorts-v6';
 const KABUK = ['./', './index.html', './manifest.json', './icon.svg', './veri/meta.js', './veri/v00.js'];
 
 self.addEventListener('install', e => {
