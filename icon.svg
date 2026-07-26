@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="42" fill="#0b0d12"/>
+  <rect x="52" y="26" width="88" height="112" rx="14" fill="#141824" stroke="#5ad1a0" stroke-width="4"/>
+  <text x="96" y="88" font-family="Segoe UI,Arial,sans-serif" font-size="42" font-weight="800"
+        fill="#f2f5ff" text-anchor="middle">EN</text>
+  <text x="96" y="116" font-family="Segoe UI,Arial,sans-serif" font-size="17"
+        fill="#5ad1a0" text-anchor="middle">okunuş</text>
+  <path d="M96 148 l0 22 M84 160 l12 12 l12 -12" stroke="#5ad1a0" stroke-width="8"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

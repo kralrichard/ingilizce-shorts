@@ -1,0 +1,14 @@
+{
+  "name": "İngilizce Shorts",
+  "short_name": "EN Shorts",
+  "description": "20.000 kelime, 4.000 cümle — kendiliğinden kayan kartlarla İngilizce",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "lang": "tr",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
